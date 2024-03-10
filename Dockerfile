@@ -20,7 +20,7 @@ COPY backend ./backend/
 ENV FLASK_ENV=production
 
 # Port, auf dem die Anwendung läuft, freigeben
-EXPOSE 80
+EXPOSE 8080
 
 # Befehl zum Starten der Flask-Anwendung
 CMD ["python", "backend/main.py"]
