@@ -39,7 +39,7 @@ jobs:
              -d '{
                    "Image": "${{ secrets.DOCKER_USERNAME }}/${{ secrets.CONTAINER_NAME }}:latest",
                    "HostConfig": {
-                     "PortBindings": { "80/tcp": [{ "HostPort": "5002" }] } ,,
+                     "PortBindings": { "8080/tcp": [{ "HostPort": "5002" }] } ,,
                      "RestartPolicy": { "Name": "unless-stopped" }
                    }
                  }'
