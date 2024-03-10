@@ -5,11 +5,11 @@ name: Build App
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "1234" ]
     paths-ignore:
       - 'frontend/dist/**'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "1234" ]
     paths-ignore:
       - 'frontend/dist/**'
 
