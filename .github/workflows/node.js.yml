@@ -6,8 +6,12 @@ name: Build App
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - 'frontend/dist/**'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - 'frontend/dist/**'
 
 jobs:
 
@@ -31,16 +35,13 @@ jobs:
       - name: Build
         run: npm run build
         working-directory: ./frontend
-  
-  upload_artifacts:
-    needs: build
-    
-      
-    runs-on: ubuntu-latest
-    steps:
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-            name: built-files
-            path: /frontend/dist/
-  
+
+      - name: Upload Artifacts
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add dist/ --force
+          git commit -m "Deploying build files"
+          git push
+        working-directory: ./frontend
+
