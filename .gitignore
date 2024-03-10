@@ -11,7 +11,7 @@ frontend/lerna-debug.log*
 frontend/node_modules
 
 # Build
-# frontend/dist commented out for tesing/developement with flask
+frontend/dist
 frontend/dist-ssr
 
 # Local files
