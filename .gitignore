@@ -28,3 +28,8 @@ frontend/*.local
 *.njsproj
 *.sln
 *.sw?
+
+# Python files
+*.pyc
+*.pyo
+*.pyd
