@@ -1,16 +1,21 @@
 # Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+frontend/logs
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
 
-node_modules
-#dist
-dist-ssr
-*.local
+# Dependencies
+frontend/node_modules
+
+# Build
+# frontend/dist commented out for tesing/developement with flask
+frontend/dist-ssr
+
+# Local files
+frontend/*.local
 
 # Editor directories and files
 .vscode/*
