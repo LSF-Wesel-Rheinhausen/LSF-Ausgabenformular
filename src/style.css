@@ -1,0 +1,27 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  padding-top: 8vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* For Dev */
+
+}
+
+h1,
+p,
+a {
+  margin: 0;
+
+}
