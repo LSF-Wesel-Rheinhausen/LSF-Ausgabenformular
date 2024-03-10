@@ -11,7 +11,8 @@ def index():
     return send_from_directory(app.template_folder, 'index.html')
 
 
-@app.route('/api/v1/post_form', methods=["POST"]) ##Datum; Rechnungsnummer; Name; Liste von Artikeln (Artikelnummer	Beschreibung	Verwendung	Kostenstelle	Preis (€))
+@app.route('/api/v1/post_form', methods=["POST"])  # #Datum; Rechnungsnummer; Name; Liste von Artikeln (
+# Artikelnummer	Beschreibung	Verwendung	Kostenstelle	Preis (€))
 def post_form():
     if request.method == "POST" and '/' in request.referrer:
         logging.debug("POST request from root")
