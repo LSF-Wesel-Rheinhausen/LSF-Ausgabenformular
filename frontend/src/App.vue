@@ -14,7 +14,7 @@ interface Row {
 const columns: string[] = ['articleNumber', 'description', 'usage', 'costCenter', 'amount'];
 const headers: string[] = ['Artikelnummer', 'Beschreibung', 'Verwendung', 'Kostenstelle', 'Menge']; // Angepasste Kopfzeilentexte
 const costCenterOptions: string[] = [
-  '4240 Test', '4250', '4300', '4360', '4361', '4362', '4500', '4510', '4520', '4600',
+  '4240', '4250', '4300', '4360', '4361', '4362', '4500', '4510', '4520', '4600',
   '4610', '4700', '4705', '4710', '4720', '4721', '4722', '4730', '4740', '4800',
   '4805', '4806', '4810', '4811', '4812', '4813', '4814', '4815', '4816', '4817',
   '4818', '4824', '4830', '4831', '4832', '4833', '4834', '4835', '4850', '4860',
