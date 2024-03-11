@@ -146,7 +146,7 @@ async function submitDataWithMail() {
   uploadData.append("total", formData.value.total);
 
   try {
-    const response = await axios.post('/api/v1/testwithmail', uploadData, {
+    const response = await axios.post('/api/v1/test_with_mail', uploadData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
