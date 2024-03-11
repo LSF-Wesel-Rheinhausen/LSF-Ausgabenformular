@@ -1,6 +1,8 @@
 import json
 import logging
 from flask import Flask, render_template, request, make_response, redirect, send_from_directory
+import sendMail
+import getConfig
 
 # create flask app
 app = Flask(__name__, static_folder='../frontend/dist/assets', template_folder='../frontend/dist')
@@ -17,6 +19,11 @@ def index():
 def post_form():
     if request.method == "POST" and '/' in request.referrer:
         logging.debug("POST request from root")
+        sendMail.send_mail(getConfig.get_config("mail_sender"), getConfig.get_config("mail_recipient"), "Exported "
+                                                                                                          "List",
+                             "Hey Kassierer, ein neuer Ausgabenbeleg ist eingegangen!", None, getConfig.get_config(
+                "mail_server"), getConfig.get_config("mail_port"), getConfig.get_config("mail_username"),
+                             getConfig.get_config("mail_password"), getConfig.get_config("mail_tls"))
     redirect("/", code=302)
 
 
@@ -29,7 +36,7 @@ def test():
         global _global_request
         _global_request = rq
         return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
-    redirect("/")
+    redirect("/", code=302)
 
 
 @app.route('/test')

@@ -33,3 +33,4 @@ frontend/*.local
 *.pyc
 *.pyo
 *.pyd
+/config/config.yaml
