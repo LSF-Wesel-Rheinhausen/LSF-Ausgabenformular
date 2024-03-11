@@ -2,8 +2,9 @@ import json
 import logging
 from flask import Flask, render_template, request, make_response, redirect, send_from_directory
 from werkzeug.utils import secure_filename
-
+from gevent.pywsgi import WSGIServer
 import webwork
+import getConfig
 
 # create flask app
 app = Flask(__name__, static_folder='../frontend/dist/assets', template_folder='../frontend/dist')
@@ -51,5 +52,10 @@ def testreturn():
 
 if __name__ == '__main__':
     logging.debug("Starting app")
-    logging.basicConfig(level=logging.DEBUG)
-    app.run(debug=True, host="0.0.0.0", port="8080")
+    if getConfig.get_config("environment") == "development":
+        logging.basicConfig(level=logging.DEBUG)
+        app.run(debug=True, host="0.0.0.0", port="8080")
+    else:
+        logging.basicConfig(level=logging.INFO)
+        http_server = WSGIServer(('0.0.0.0', 8080), app)
+        http_server.serve_forever() # start the server
