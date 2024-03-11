@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { typeRampBaseFontSize, typeRampPlus2FontSize } from '@fluentui/web-components';
 import { ref, computed, onMounted } from 'vue';
+import axios from 'axios';
 import FVTextField from './components/fluent-wrapper/FVTextField.vue';
 import FVComboBox from './components/fluent-wrapper/FVComboBox.vue';
 
@@ -73,6 +74,21 @@ function handleFileSelect() {
   }
 }
 
+const formData = ref({
+  memberName: ''
+});
+
+async function submitData() {
+  try {
+    const response = await axios.post('/api/v1/test', formData.value);
+    console.log(response.data);
+    alert(response.data)
+  } catch (error) {
+    console.error(error);
+    alert(error);
+  }
+}
+
 </script>
 
 <template>
@@ -107,7 +123,7 @@ function handleFileSelect() {
           <p>Name des Mitgliedes: </p>
         </div>
         <div class="col">
-          <fluent-text-field placeholder="Name..."></fluent-text-field>
+          <fluent-text-field v-model="formData.memberName" placeholder="Name..."></fluent-text-field>
         </div>
 
       </div>
@@ -165,8 +181,8 @@ function handleFileSelect() {
                   class="cost-select" position="below">
                   <fluent-option position="below" class="combo-option" v-for="option in costCenterOptions" :key="option"
                     :value="option">{{
-                option
-              }}</fluent-option>
+            option
+          }}</fluent-option>
 
                 </FVComboBox>
               </td>
@@ -178,6 +194,7 @@ function handleFileSelect() {
       </fluent-card>
     </div>
 
+    <fluent-button appearance="accent" @click="submitData">Test Submit</fluent-button>
   </div>
 </template>
 
