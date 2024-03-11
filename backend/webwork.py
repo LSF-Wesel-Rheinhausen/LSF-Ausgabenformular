@@ -1,11 +1,10 @@
 import os
 import shutil
 from datetime import datetime
-from html import escape
-
 from werkzeug.utils import secure_filename
 
-from backend import sendMail, getConfig
+import sendMail
+import getConfig
 
 
 def test_with_mail(request):
