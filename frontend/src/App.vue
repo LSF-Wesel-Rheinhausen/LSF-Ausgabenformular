@@ -117,11 +117,7 @@ async function submitData() {
   uploadData.append("total", formData.value.total);
 
   try {
-    const response = await axios.post('/api/v1/test', uploadData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+    const response = await axios.post('/api/v1/test', uploadData);
     console.log(response.data);
   } catch (error) {
     console.error(error);
@@ -146,11 +142,7 @@ async function submitDataWithMail() {
   uploadData.append("total", formData.value.total);
 
   try {
-    const response = await axios.post('/api/v1/test_with_mail', uploadData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+    const response = await axios.post('/api/v1/test_with_mail', uploadData);
     console.log(response.data);
   } catch (error) {
     console.error(error);
