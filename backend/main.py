@@ -39,7 +39,7 @@ def test():
 
 
 @app.route('/api/v1/test_with_mail', methods=["POST"])
-def test():
+def test_with_mail():
     if request.method == "POST":
         logging.debug("POST request from root")
         rq = request.json
