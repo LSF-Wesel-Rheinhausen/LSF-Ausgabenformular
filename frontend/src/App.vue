@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { typeRampBaseFontSize, typeRampPlus2FontSize } from '@fluentui/web-components';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watchEffect } from 'vue';
 import axios from 'axios';
 import FVTextField from './components/fluent-wrapper/FVTextField.vue';
 import FVComboBox from './components/fluent-wrapper/FVComboBox.vue';
@@ -63,7 +63,7 @@ onMounted(() => {
   }
 });
 
-function handleFileSelect() {
+function handleFileSelect(event: Event) {
   // Prüfen, ob 'fileInput.value' und 'fileInput.value.files' existieren
   if (fileInput.value && fileInput.value.files && fileInput.value.files.length > 0) {
     const fileName = fileInput.value.files[0].name;
@@ -72,17 +72,48 @@ function handleFileSelect() {
       fileNameDisplay.value.textContent = `Augewählte Datei: ${fileName}`;
     }
   }
+  const target = event.target as HTMLInputElement;
+  if (target.files?.length) {
+    formData.value.file = target.files[0]; // Nehmen Sie die erste ausgewählte Datei
+  } else {
+    formData.value.file = null; // Setzen Sie file auf null, wenn keine Datei ausgewählt ist
+  }
 }
 
-const formData = ref({
-  memberName: ''
+interface FormData {
+  date: string;
+  invoiceNumber: string,
+  memberName: string;
+  file: File | null;
+  total: string;
+}
+
+const formData = ref<FormData>({
+  date: 'N/A',
+  invoiceNumber: 'N/A',
+  memberName: 'N/A',
+  file: null,
+  total: calculateTotal.value,
+});
+
+watchEffect(() => {
+  formData.value.total = calculateTotal.value;
 });
 
 async function submitData() {
   try {
     const response = await axios.post('/api/v1/test', formData.value);
     console.log(response.data);
-    alert(response.data)
+  } catch (error) {
+    console.error(error);
+    alert(error);
+  }
+}
+
+async function submitDataWithMail() {
+  try {
+    const response = await axios.post('/api/v1/test_with_mail', formData.value);
+    console.log(response.data);
   } catch (error) {
     console.error(error);
     alert(error);
@@ -107,7 +138,7 @@ async function submitData() {
           <p>Datum: </p>
         </div>
         <div class="col">
-          <fluent-text-field type="date"></fluent-text-field>
+          <fluent-text-field v-model="formData.date" type="date"></fluent-text-field>
         </div>
       </div>
       <div class="row">
@@ -115,7 +146,7 @@ async function submitData() {
           <p>Rechnungsnummer: </p>
         </div>
         <div class="col">
-          <fluent-text-field placeholder="Rechnugnsnummer..."></fluent-text-field>
+          <fluent-text-field v-model="formData.invoiceNumber" placeholder="Rechnugnsnummer..."></fluent-text-field>
         </div>
       </div>
       <div class="row">
@@ -195,6 +226,7 @@ async function submitData() {
     </div>
 
     <fluent-button appearance="accent" @click="submitData">Test Submit</fluent-button>
+    <fluent-button appearance="accent" @click="submitDataWithMail">Test Submit with Mail</fluent-button>
   </div>
 </template>
 
