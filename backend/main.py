@@ -18,6 +18,13 @@ def post_form():
         logging.debug("POST request from root")
     redirect("/")
 
+@app.route('/api/v1/test', methods=["POST"])
+def test():
+    if request.method == "POST":
+        logging.debug("POST request from root")
+        rq = request.json
+        print(rq)
+    redirect("/")
 
 if __name__ == '__main__':
     logging.debug("Starting app")
