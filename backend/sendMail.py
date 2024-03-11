@@ -1,3 +1,4 @@
+import logging
 import smtplib
 from pathlib import Path
 from email.mime.multipart import MIMEMultipart
@@ -46,6 +47,14 @@ def send_mail(send_from, send_to, subject, message, files=None,
     smtp = smtplib.SMTP(server, port)
     if use_tls:
         smtp.starttls()
-    smtp.login(username, password)
-    smtp.sendmail(send_from, send_to, msg.as_string())
-    smtp.quit()
+    try:
+        smtp.login(username, password)
+    except Exception as e:
+        logging.error("Error while logging into mail server: " + str(e))
+    try:
+        smtp.sendmail(send_from, send_to, msg.as_string())
+        smtp.quit()
+        logging.info("Mail sent successfully at " + formatdate(localtime=True))
+    except Exception as e:
+        logging.error("Error while sending mail: " + str(e))
+        smtp.quit()

@@ -20,10 +20,10 @@ def post_form():
     if request.method == "POST" and '/' in request.referrer:
         logging.debug("POST request from root")
         sendMail.send_mail(getConfig.get_config("mail_sender"), getConfig.get_config("mail_recipient"), "Exported "
-                                                                                                          "List",
-                             "Hey Kassierer, ein neuer Ausgabenbeleg ist eingegangen!", None, getConfig.get_config(
+                                                                                                        "List",
+                           "Hey Kassierer, ein neuer Ausgabenbeleg ist eingegangen!", None, getConfig.get_config(
                 "mail_server"), getConfig.get_config("mail_port"), getConfig.get_config("mail_username"),
-                             getConfig.get_config("mail_password"), getConfig.get_config("mail_tls"))
+                           getConfig.get_config("mail_password"), getConfig.get_config("mail_tls"))
     redirect("/", code=302)
 
 
@@ -32,9 +32,26 @@ def test():
     if request.method == "POST":
         logging.debug("POST request from root")
         rq = request.json
-        print(rq)
         global _global_request
         _global_request = rq
+        return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+    redirect("/", code=302)
+
+
+@app.route('/api/v1/test_with_mail', methods=["POST"])
+def test():
+    if request.method == "POST":
+        logging.debug("POST request from root")
+        rq = request.json
+        global _global_request
+        _global_request = rq
+        sendMail.send_mail(getConfig.get_config("mail_sender"), getConfig.get_config("mail_recipient"), "**** TEST "
+                                                                                                        "Neuer"
+                                                                                                        "Ausgabenbeleg "
+                                                                                                        "TEST ****",
+                           "Hey Admin! Dies ist ein Test!", None, getConfig.get_config(
+                "mail_server"), getConfig.get_config("mail_port"), getConfig.get_config("mail_username"),
+                           getConfig.get_config("mail_password"), getConfig.get_config("mail_tls"))
         return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
     redirect("/", code=302)
 
