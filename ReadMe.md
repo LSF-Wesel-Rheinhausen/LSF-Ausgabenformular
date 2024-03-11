@@ -1,3 +1,4 @@
+[![Deploy to Portainer with Self-Hosted Runner](https://github.com/LSF-Wesel-Rheinhausen/LSF-Ausgabenformular/actions/workflows/Docker-build.yml/badge.svg)](https://github.com/LSF-Wesel-Rheinhausen/LSF-Ausgabenformular/actions/workflows/Docker-build.yml) [![CodeQL](https://github.com/LSF-Wesel-Rheinhausen/LSF-Ausgabenformular/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/LSF-Wesel-Rheinhausen/LSF-Ausgabenformular/actions/workflows/github-code-scanning/codeql) 
 # LSF-Ausgabenformular
 
 A web application developed using Python, TypeScript, JavaScript, NPM, Vue, and Pip.
