@@ -4,7 +4,8 @@ from flask import Flask, render_template, request, make_response, redirect, send
 
 # create flask app
 app = Flask(__name__, static_folder='../frontend/dist/assets', template_folder='../frontend/dist')
-global_request = "No test data available"
+_global_request = "No request yet"
+
 
 @app.route('/')
 def index():
@@ -16,7 +17,8 @@ def index():
 def post_form():
     if request.method == "POST" and '/' in request.referrer:
         logging.debug("POST request from root")
-    redirect("/")
+    redirect("/", code=302)
+
 
 @app.route('/api/v1/test', methods=["POST"])
 def test():
@@ -24,12 +26,17 @@ def test():
         logging.debug("POST request from root")
         rq = request.json
         print(rq)
-        global_request = rq
+        global _global_request
+        _global_request = rq
+        return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
     redirect("/")
+
 
 @app.route('/test')
 def testreturn():
-    return global_request
+    global _global_request
+    return _global_request
+
 
 if __name__ == '__main__':
     logging.debug("Starting app")
