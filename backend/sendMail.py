@@ -7,8 +7,10 @@ from email.mime.text import MIMEText
 from email.utils import formatdate
 from email import encoders
 
+from werkzeug.utils import secure_filename
 
-def send_mail(send_from, send_to, subject, message, files=None,
+
+def send_mail(send_from, send_to, subject, message, files,
               server="localhost", port=587, username='', password='',
               use_tls=True):
     """Compose and send email with provided info and attachments.
@@ -25,24 +27,23 @@ def send_mail(send_from, send_to, subject, message, files=None,
         password (str): server auth password
         use_tls (bool): use TLS mode
     """
-    if files is None:
-        files = []
+
     msg = MIMEMultipart()
     msg['From'] = send_from
-    msg['To'] = send_to
+    msg['To'] = ', '.join(send_to)
     msg['Date'] = formatdate(localtime=True)
     msg['Subject'] = subject
 
-    msg.attach(MIMEText(message))
-
-    for path in files:
+    for file in files:
+        filename = secure_filename(file.filename)
         part = MIMEBase('application', "octet-stream")
-        with open(path, 'rb') as file:
-            part.set_payload(file.read())
+        with open(f'./temp/{filename}', 'rb') as temp_file:
+            part.set_payload(temp_file.read())
         encoders.encode_base64(part)
         part.add_header('Content-Disposition',
-                        'attachment; filename={}'.format(Path(path).name))
+                        'attachment; filename={}'.format(Path(str(filename)).name))
         msg.attach(part)
+    msg.attach(MIMEText(message))
 
     smtp = smtplib.SMTP(server, port)
     if use_tls:

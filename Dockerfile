@@ -16,6 +16,7 @@ COPY frontend/dist ./frontend/dist/
 # Kopieren der Assets in das Arbeitsverzeichnis im Container
 COPY backend ./backend/
 
+MKDIR ./temp/
 # Umgebungsvariable setzen, um Flask im Produktionsmodus laufen zu lassen
 ENV FLASK_ENV=production
 
