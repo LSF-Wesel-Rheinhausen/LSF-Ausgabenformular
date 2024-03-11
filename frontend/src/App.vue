@@ -55,7 +55,6 @@ const calculateTotal = computed((): string => {
 
 // Zugriff auf das input-Element und das div-Element für die Anzeige des Dateinamens
 const fileInput = ref<HTMLInputElement | null>(null);
-const fileNameDisplay = ref<HTMLElement | null>(null);
 
 onMounted(() => {
   if (fileInput.value) {
@@ -64,27 +63,23 @@ onMounted(() => {
 });
 
 function handleFileSelect(event: Event) {
-  // Prüfen, ob 'fileInput.value' und 'fileInput.value.files' existieren
-  if (fileInput.value && fileInput.value.files && fileInput.value.files.length > 0) {
-    const fileName = fileInput.value.files[0].name;
-    // Prüfen, ob 'fileNameDisplay.value' existiert, bevor darauf zugegriffen wird
-    if (fileNameDisplay.value) {
-      fileNameDisplay.value.textContent = `Augewählte Datei: ${fileName}`;
-    }
+  const input = event.target as HTMLInputElement;
+  if (input.files) {
+    const newFiles = Array.from(input.files);
+    formData.value.files.push(...newFiles); // Fügt neue Dateien zur Liste hinzu
+    input.value = ''; // Setzt das input-Element zurück, damit dieselbe Datei erneut ausgewählt werden kann
   }
-  const target = event.target as HTMLInputElement;
-  if (target.files?.length) {
-    formData.value.file = target.files[0]; // Nehmen Sie die erste ausgewählte Datei
-  } else {
-    formData.value.file = null; // Setzen Sie file auf null, wenn keine Datei ausgewählt ist
-  }
+}
+
+function removeFile(index: number) {
+  formData.value.files.splice(index, 1); // Entfernt die Datei an der spezifizierten Position
 }
 
 interface FormData {
   date: string;
   invoiceNumber: string,
   memberName: string;
-  file: File | null;
+  files: File[];
   total: string;
 }
 
@@ -92,7 +87,7 @@ const formData = ref<FormData>({
   date: '',
   invoiceNumber: '',
   memberName: '',
-  file: null,
+  files: [],
   total: calculateTotal.value,
 });
 
@@ -102,7 +97,7 @@ watchEffect(() => {
 
 async function submitData() {
 
-  if (!formData.value.file) {
+  if (formData.value.files.length === 0) {
     console.error("Keine Datei ausgewählt");
     alert("Keine Datei ausgewählt");
     return;
@@ -113,8 +108,11 @@ async function submitData() {
   uploadData.append("date", formData.value.date);
   uploadData.append("invoiceNumber", formData.value.invoiceNumber);
   uploadData.append("memberName", formData.value.memberName);
-  uploadData.append("file", formData.value.file);
   uploadData.append("total", formData.value.total);
+
+  formData.value.files.forEach((file, index) => {
+    uploadData.append(`files[${index}]`, file);
+  });
 
   try {
     const response = await axios.post('/api/v1/test', uploadData);
@@ -127,7 +125,7 @@ async function submitData() {
 
 async function submitDataWithMail() {
 
-  if (!formData.value.file) {
+  if (formData.value.files.length === 0) {
     console.error("Keine Datei ausgewählt");
     alert("Keine Datei ausgewählt");
     return;
@@ -138,8 +136,11 @@ async function submitDataWithMail() {
   uploadData.append("date", formData.value.date);
   uploadData.append("invoiceNumber", formData.value.invoiceNumber);
   uploadData.append("memberName", formData.value.memberName);
-  uploadData.append("file", formData.value.file);
   uploadData.append("total", formData.value.total);
+
+  formData.value.files.forEach((file, index) => {
+    uploadData.append(`files[${index}]`, file);
+  });
 
   try {
     const response = await axios.post('/api/v1/test_with_mail', uploadData);
@@ -160,9 +161,7 @@ async function submitDataWithMail() {
       <h1 class="title">Ausgabenbeleg LSF-Wesel-Rheinhausen e.V.</h1>
     </div>
 
-
     <div class="general-information-container">
-
 
       <div class="row">
         <div class="col">
@@ -191,7 +190,7 @@ async function submitDataWithMail() {
       </div>
       <div class="row">
         <div class="col">
-          <p>Rechnungsdatei: </p>
+          <p>Rechnungsdateien: </p>
         </div>
         <div class="col">
           <label for="file" class="custum-file-upload">
@@ -209,13 +208,25 @@ async function submitDataWithMail() {
             <div class="text">
               <span>Click to Upload</span>
             </div>
-            <input id="file" type="file" ref="fileInput">
+            <input id="file" type="file" ref="fileInput" multiple>
           </label>
           <div ref="fileNameDisplay" class="uploaded-lable"></div>
-
         </div>
-
       </div>
+      <div class="row" v-if="formData.files.length !== 0">
+        <div class="col">
+          <p>Ausgewählte Dateien:</p>
+        </div>
+        <div class="col">
+          <div class="uploaded-files-container">
+            <p v-for="(file, index) in formData.files" :key="index" class="uploaded-file">
+              {{ file.name }}
+              <button @click="removeFile(index)">&#10060;</button>
+            </p>
+          </div>
+        </div>
+      </div>
+
     </div>
 
 
@@ -304,6 +315,38 @@ async function submitDataWithMail() {
 
 .general-information-container p {
   font-size: 1.5em;
+}
+
+.uploaded-files-container {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+}
+
+.uploaded-file {
+
+  border-radius: .5rem;
+
+  background-color: #036ec9;
+  color: white;
+
+  padding: .25rem .5rem;
+  font-size: .9rem !important;
+  width: fit-content;
+  max-width: 70%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.uploaded-file button {
+  border: none;
+  background-color: transparent;
+  font-size: .9rem;
+  padding: 0;
+  margin-left: .5rem;
+  cursor: pointer;
 }
 
 
