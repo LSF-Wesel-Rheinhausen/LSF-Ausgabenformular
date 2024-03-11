@@ -89,9 +89,9 @@ interface FormData {
 }
 
 const formData = ref<FormData>({
-  date: 'N/A',
-  invoiceNumber: 'N/A',
-  memberName: 'N/A',
+  date: '',
+  invoiceNumber: '',
+  memberName: '',
   file: null,
   total: calculateTotal.value,
 });
@@ -101,8 +101,27 @@ watchEffect(() => {
 });
 
 async function submitData() {
+
+  if (!formData.value.file) {
+    console.error("Keine Datei ausgewählt");
+    alert("Keine Datei ausgewählt");
+    return;
+  }
+
+  // Erstellen eines FormData Objekts für den Upload
+  const uploadData = new FormData();
+  uploadData.append("date", formData.value.date);
+  uploadData.append("invoiceNumber", formData.value.invoiceNumber);
+  uploadData.append("memberName", formData.value.memberName);
+  uploadData.append("file", formData.value.file);
+  uploadData.append("total", formData.value.total);
+
   try {
-    const response = await axios.post('/api/v1/test', formData.value);
+    const response = await axios.post('/api/v1/test', uploadData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
     console.log(response.data);
   } catch (error) {
     console.error(error);
@@ -111,14 +130,34 @@ async function submitData() {
 }
 
 async function submitDataWithMail() {
+
+  if (!formData.value.file) {
+    console.error("Keine Datei ausgewählt");
+    alert("Keine Datei ausgewählt");
+    return;
+  }
+
+  // Erstellen eines FormData Objekts für den Upload
+  const uploadData = new FormData();
+  uploadData.append("date", formData.value.date);
+  uploadData.append("invoiceNumber", formData.value.invoiceNumber);
+  uploadData.append("memberName", formData.value.memberName);
+  uploadData.append("file", formData.value.file);
+  uploadData.append("total", formData.value.total);
+
   try {
-    const response = await axios.post('/api/v1/test_with_mail', formData.value);
+    const response = await axios.post('/api/v1/testwithmail', uploadData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
     console.log(response.data);
   } catch (error) {
     console.error(error);
     alert(error);
   }
 }
+
 
 </script>
 
