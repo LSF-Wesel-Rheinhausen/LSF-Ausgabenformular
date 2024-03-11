@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, make_response, redirect, send
 
 # create flask app
 app = Flask(__name__, static_folder='../frontend/dist/assets', template_folder='../frontend/dist')
-
+global_request = "No test data available"
 
 @app.route('/')
 def index():
@@ -24,7 +24,12 @@ def test():
         logging.debug("POST request from root")
         rq = request.json
         print(rq)
+        global_request = rq
     redirect("/")
+
+@app.route('/test')
+def testreturn():
+    return global_request
 
 if __name__ == '__main__':
     logging.debug("Starting app")
