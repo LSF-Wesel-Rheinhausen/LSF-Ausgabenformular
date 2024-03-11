@@ -110,8 +110,8 @@ async function submitData() {
   uploadData.append("memberName", formData.value.memberName);
   uploadData.append("total", formData.value.total);
 
-  formData.value.files.forEach((file, index) => {
-    uploadData.append(`files[${index}]`, file);
+  formData.value.files.forEach((file) => {
+    uploadData.append('files', file); // Verwenden Sie `files` als Schlüssel für alle Dateien
   });
 
   try {
@@ -138,8 +138,8 @@ async function submitDataWithMail() {
   uploadData.append("memberName", formData.value.memberName);
   uploadData.append("total", formData.value.total);
 
-  formData.value.files.forEach((file, index) => {
-    uploadData.append(`files[${index}]`, file);
+  formData.value.files.forEach((file) => {
+    uploadData.append('files', file); // Verwenden Sie `files` als Schlüssel für alle Dateien
   });
 
   try {
