@@ -5,3 +5,4 @@ mail_password: "your_mail_password"
 mail_sender: "your_mail_sender"
 mail_recipient: "your_mail_recipient" # add recipients separated by comma
 mail_tls: "True"
+environment: "production"

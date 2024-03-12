@@ -1,7 +1,9 @@
 import json
 import logging
 from flask import Flask, render_template, request, make_response, redirect, send_from_directory
-import sendMail
+from werkzeug.utils import secure_filename
+from gevent.pywsgi import WSGIServer
+import webwork
 import getConfig
 
 # create flask app
@@ -19,11 +21,7 @@ def index():
 def post_form():
     if request.method == "POST" and '/' in request.referrer:
         logging.debug("POST request from root")
-        sendMail.send_mail(getConfig.get_config("mail_sender"), getConfig.get_config("mail_recipient"), "Exported "
-                                                                                                        "List",
-                           "Hey Kassierer, ein neuer Ausgabenbeleg ist eingegangen!", None, getConfig.get_config(
-                "mail_server"), getConfig.get_config("mail_port"), getConfig.get_config("mail_username"),
-                           getConfig.get_config("mail_password"), getConfig.get_config("mail_tls"))
+        webwork.post_form(request)
     redirect("/", code=302)
 
 
@@ -42,17 +40,7 @@ def test():
 def test_with_mail():
     if request.method == "POST":
         logging.debug("POST request from root")
-        rq = request.json
-        global _global_request
-        _global_request = rq
-        sendMail.send_mail(getConfig.get_config("mail_sender"), getConfig.get_config("mail_recipient"), "**** TEST "
-                                                                                                        "Neuer"
-                                                                                                        "Ausgabenbeleg "
-                                                                                                        "TEST ****",
-                           "Hey Admin! Dies ist ein Test!", None, getConfig.get_config(
-                "mail_server"), getConfig.get_config("mail_port"), getConfig.get_config("mail_username"),
-                           getConfig.get_config("mail_password"), getConfig.get_config("mail_tls"))
-        return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+        return webwork.post_form(request)
     redirect("/", code=302)
 
 
@@ -64,4 +52,10 @@ def testreturn():
 
 if __name__ == '__main__':
     logging.debug("Starting app")
-    app.run(debug=True, host="0.0.0.0", port="8080")
+    if getConfig.get_config("environment") == "development":
+        logging.basicConfig(level=logging.DEBUG)
+        app.run(debug=True, host="0.0.0.0", port="8080")
+    else:
+        logging.basicConfig(level=logging.INFO)
+        http_server = WSGIServer(('0.0.0.0', 8080), app)
+        http_server.serve_forever() # start the server

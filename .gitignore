@@ -34,3 +34,4 @@ frontend/*.local
 *.pyo
 *.pyd
 /config/config.yaml
+/temp/
