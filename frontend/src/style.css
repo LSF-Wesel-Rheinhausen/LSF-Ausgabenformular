@@ -10,13 +10,9 @@
 
 body {
   padding-top: 8vh;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  /* For Dev */
-
 }
 
 h1,

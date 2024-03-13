@@ -1,12 +1,23 @@
 <script setup lang="ts">
 import { typeRampBaseFontSize, typeRampPlus2FontSize } from '@fluentui/web-components';
-import { ref, computed, onMounted, watchEffect } from 'vue';
+import { ref, computed, onMounted, watchEffect, ComponentPublicInstance } from 'vue';
 import axios from 'axios';
 import FVTextField from './components/fluent-wrapper/FVTextField.vue';
 import FVComboBox from './components/fluent-wrapper/FVComboBox.vue';
-
+import SignaturePad from './components/SignaturePad.vue';
+import DialogComponent from './components/DialogComponent.vue';
 
 typeRampBaseFontSize.withDefault(typeRampPlus2FontSize)
+
+interface DialogComponentInstance extends ComponentPublicInstance {
+  openDialog: () => void;
+  closeDialog: () => void;
+}
+const dialogRef = ref<DialogComponentInstance | null>(null);
+
+function openDialog() {
+  dialogRef.value?.openDialog();
+}
 
 interface Row {
   [key: string]: string | number;
@@ -75,12 +86,23 @@ function removeFile(index: number) {
   formData.value.files.splice(index, 1); // Entfernt die Datei an der spezifizierten Position
 }
 
+function handleSignatureUpdate(signatureImage: string) {
+  formData.value.signature = signatureImage; // Aktualisiere die Unterschrift in deinen Formulardaten
+}
+
 interface FormData {
   date: string;
   invoiceNumber: string,
   memberName: string;
   files: File[];
   total: string;
+  withdrawalSelection: string;
+  bankRecipient: string;
+  iban: string;
+  bic: string;
+  approver: string;
+  signature: string;
+  remarks: string;
 }
 
 const formData = ref<FormData>({
@@ -89,6 +111,13 @@ const formData = ref<FormData>({
   memberName: '',
   files: [],
   total: calculateTotal.value,
+  withdrawalSelection: '',
+  bankRecipient: '',
+  iban: '',
+  bic: '',
+  approver: '',
+  signature: '',
+  remarks: ''
 });
 
 watchEffect(() => {
@@ -109,34 +138,9 @@ async function submitData() {
   uploadData.append("invoiceNumber", formData.value.invoiceNumber);
   uploadData.append("memberName", formData.value.memberName);
   uploadData.append("total", formData.value.total);
-
-  formData.value.files.forEach((file) => {
-    uploadData.append('files', file); // Verwenden Sie `files` als Schlüssel für alle Dateien
-  });
-
-  try {
-    const response = await axios.post('/api/v1/test', uploadData);
-    console.log(response.data);
-  } catch (error) {
-    console.error(error);
-    alert(error);
-  }
-}
-
-async function submitDataWithMail() {
-
-  if (formData.value.files.length === 0) {
-    console.error("Keine Datei ausgewählt");
-    alert("Keine Datei ausgewählt");
-    return;
-  }
-
-  // Erstellen eines FormData Objekts für den Upload
-  const uploadData = new FormData();
-  uploadData.append("date", formData.value.date);
-  uploadData.append("invoiceNumber", formData.value.invoiceNumber);
-  uploadData.append("memberName", formData.value.memberName);
-  uploadData.append("total", formData.value.total);
+  uploadData.append("withdrawalSelection", formData.value.withdrawalSelection);
+  uploadData.append("signature", formData.value.signature);
+  uploadData.append("remarks", formData.value.remarks);
 
   formData.value.files.forEach((file) => {
     uploadData.append('files', file); // Verwenden Sie `files` als Schlüssel für alle Dateien
@@ -150,8 +154,6 @@ async function submitDataWithMail() {
     alert(error);
   }
 }
-
-
 </script>
 
 <template>
@@ -237,6 +239,12 @@ async function submitDataWithMail() {
       <p>46462 Wesel</p>
     </div>
 
+    <div class="dialog-container">
+      <fluent-button appearance="accent" @click="openDialog">Kostenstellen Übersicht</fluent-button>
+      <DialogComponent ref="dialogRef">
+      </DialogComponent>
+    </div>
+
     <div class="article-list-wrapper">
       <fluent-card class="article-list-card">
         <table>
@@ -267,8 +275,50 @@ async function submitDataWithMail() {
       </fluent-card>
     </div>
 
-    <fluent-button appearance="accent" @click="submitData">Test Submit</fluent-button>
-    <fluent-button appearance="accent" @click="submitDataWithMail">Test Submit with Mail</fluent-button>
+    <div class="withdrawal-container">
+      <fluent-card class="withdrawal-card">
+        <fluent-select v-model="formData.withdrawalSelection" placeholder="-- Auswählen --" class="withdrawal-select"
+          position="below">
+          <fluent-option position="below" selected value="vf">Gutschrift auf Vereinsfliegerkonto</fluent-option>
+          <fluent-option position="below" value="transfer-bank">Überweisung auf Bankkonto</fluent-option>
+          <fluent-option position="below" value="transfer-biller">Überweisung an Rechnungssteller</fluent-option>
+          <fluent-option position="below" value="directdebit-biller">Lastschrift durch Rechnungssteller</fluent-option>
+        </fluent-select>
+
+        <div class="bank-inputs" v-if="formData.withdrawalSelection.startsWith('transfer')">
+          <fluent-divider></fluent-divider>
+          <p v-if="formData.withdrawalSelection.includes('bank')">Für <strong>abweichendes</strong> Konto den Betrag auf
+            folgendes
+            Bankkonto überweisen:</p>
+          <p v-if="formData.withdrawalSelection.includes('transfer-biller')">Kontodaten des Rechnungsstellers:</p>
+          <fluent-text-field v-model="formData.bankRecipient" placeholder="Vorname Nachname">Name des
+            Empfängers</fluent-text-field>
+          <fluent-text-field v-model="formData.iban" placeholder="IBAN">IBAN</fluent-text-field>
+          <fluent-text-field v-model="formData.bic" placeholder="BIC">BIC</fluent-text-field>
+        </div>
+      </fluent-card>
+    </div>
+
+    <div class="approver-container">
+      <fluent-card>
+
+        <fluent-text-field v-model="formData.approver" placeholder="Name des Genehmigers">Ausgabe genehmigt
+          durch:</fluent-text-field>
+      </fluent-card>
+    </div>
+
+    <div class="signature-container">
+      <p>Unterschrift des Vereinsmitgliedes:</p>
+      <SignaturePad @updateSignature="handleSignatureUpdate" />
+    </div>
+
+    <div class="remarks-container">
+      <fluent-text-area v-model="formData.remarks" class="remarks" resize="both">
+        Bemerkungen:
+      </fluent-text-area>
+    </div>
+
+    <fluent-button appearance="accent" @click="submitData">Submit</fluent-button>
   </div>
 </template>
 
@@ -365,6 +415,10 @@ async function submitDataWithMail() {
   font-size: 1.4em;
 }
 
+.dialog-container {
+  text-align: end;
+}
+
 .article-list-card {
   padding: 1rem;
   height: fit-content;
@@ -372,11 +426,11 @@ async function submitDataWithMail() {
 }
 
 .article-list-wrapper {
-  margin-top: 3em;
+  margin-top: .5rem;
 }
 
 .article-list-wrapper th {
-  font-size: 1.2em;
+  font-size: 1.2rem;
 }
 
 .cost-select {
@@ -384,10 +438,87 @@ async function submitDataWithMail() {
   margin-top: -.2rem;
 }
 
-
 .total-sum {
   text-align: right;
   font-size: 1.3rem;
   font-weight: bold;
 }
-</style>./components/fluent-wrapper/FVTextField.vue
+
+.withdrawal-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.withdrawal-card {
+  contain: unset;
+  margin-top: 2rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.withdrawal-card fluent-text-field {
+  max-width: 50%;
+}
+
+.withdrawal-select {
+  max-width: 30rem;
+}
+
+.withdrawal-select fluent-option {
+  font-size: 1.2rem;
+  padding: 1rem;
+  line-height: 2rem;
+}
+
+.bank-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+}
+
+.bank-inputs p {
+  font-size: 1.3rem;
+}
+
+.approver-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.approver-container fluent-card {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.approver-container fluent-card fluent-text-field {
+  width: fit-content;
+}
+
+.signature-container p {
+  font-size: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.remarks-container {
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remarks {
+  width: 30%;
+  height: auto;
+}
+</style>./components/Dialog.vue
