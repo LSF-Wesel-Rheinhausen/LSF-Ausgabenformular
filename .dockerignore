@@ -1,6 +1,6 @@
 # structure
-**/frontend
-!**/frontend/dist
+frontend/*
+!dist
 
 #Node
 **/node_modules/
