@@ -5,7 +5,7 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
-    directory: "/"
+    directory: "/backend"
     schedule:
       interval: "weekly"
     target-branch: "main"
@@ -14,7 +14,7 @@ updates:
       - "backend"
 
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/frontend"
     schedule:
       interval: "weekly"
     target-branch: "main"

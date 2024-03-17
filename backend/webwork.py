@@ -7,17 +7,6 @@ import sendMail
 import getConfig
 
 
-def test_with_mail(request):
-    sendMail.send_mail(getConfig.get_config("mail_sender"), getConfig.get_config("mail_recipient").split(','),
-                       "**** TEST "
-                       "Neuer"
-                       "Ausgabenbeleg "
-                       "TEST ****",
-                       "Hey Admin! Dies ist ein Test!", None, getConfig.get_config(
-            "mail_server"), getConfig.get_config("mail_port"), getConfig.get_config("mail_username"),
-                       getConfig.get_config("mail_password"), getConfig.get_config("mail_tls"))
-
-
 def post_form(request):
     directory_path = 'temp/'
     # Optional: Speichern der Datei
@@ -35,6 +24,9 @@ def post_form(request):
     invoice_number = request.form.get('invoiceNumber', 'N/A')
     member_name = request.form.get('memberName', 'N/A')
     total = request.form.get('total', 'N/A')
+    withdrawal_selection = request.form.get('withdrawalSelection', 'N/A')
+    signature = request.form.get('signature', 'N/A')
+    remarks = request.form.get('remarks', 'N/A')
     counter = str(counter)
     title = "Neuer Ausgabenbeleg " + invoice_number + " von " + member_name + " über " + total + "€"
     messagebody = "Hey Kassierer! \nEin neuer Ausgabenbeleg von " + member_name + " über " + total + " € ist am " + str(
