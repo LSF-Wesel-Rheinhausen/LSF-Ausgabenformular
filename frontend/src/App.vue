@@ -143,7 +143,7 @@ async function submitData() {
   uploadData.append("remarks", formData.value.remarks);
 
   formData.value.files.forEach((file) => {
-    uploadData.append('files', file); // Verwenden Sie `files` als Schlüssel für alle Dateien
+    uploadData.append('files', file);
   });
 
   try {
@@ -324,6 +324,50 @@ async function submitData() {
 
 <style scoped>
 @import './styles/file-upload.css';
+
+@media (max-width: 600px) {
+
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+  }
+
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  tr {
+    border: 1px solid #ccc;
+    margin-bottom: 5px;
+  }
+
+  td {
+    border: none;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    padding-left: 50%;
+    text-align: left;
+    display: block;
+    text-align: right;
+  }
+
+  td:before {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    content: attr(data-label);
+    text-align: left;
+  }
+}
 
 .header {
   background-color: white;
