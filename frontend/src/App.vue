@@ -33,6 +33,13 @@ const costCenterOptions: string[] = [
   '4900', '4910', '4920', '4930', '4940', '4950', '4951', '4960'
 ];
 
+const withdrawalOptions = ref([
+  { name: 'Gutschrift auf Vereinsfliegerkonto', code: 'vf' },
+  { name: 'Überweisung auf Bankkonto', code: 'transfer-bank' },
+  { name: 'Überweisung an Rechnungssteller', code: 'transfer-biller' },
+  { name: 'Lastschrift durch Rechnungssteller', code: 'directdebit-biller' }
+]);
+
 function createEmptyRow(): Row {
   return columns.reduce((acc: Row, column: string) => {
     acc[column] = column === 'amount' ? 0 : '';
@@ -111,7 +118,7 @@ const formData = ref<FormData>({
   memberName: '',
   files: [],
   total: calculateTotal.value,
-  withdrawalSelection: '',
+  withdrawalSelection: 'vf',
   bankRecipient: '',
   iban: '',
   bic: '',
@@ -157,7 +164,7 @@ async function submitData() {
 </script>
 
 <template>
-  <div>
+  <div class="main-wrapper">
     <div class="header">
       <img src="./assets/Logo.jpg" class="logo" alt="Logo">
       <h1 class="title">Ausgabenbeleg LSF-Wesel-Rheinhausen e.V.</h1>
@@ -170,7 +177,7 @@ async function submitData() {
           <p>Datum: </p>
         </div>
         <div class="col">
-          <fluent-text-field v-model="formData.date" type="date"></fluent-text-field>
+          <Calendar v-model="formData.date" dateFormat="dd.mm.yy" variant="filled" showIcon showButtonBar />
         </div>
       </div>
       <div class="row">
@@ -178,7 +185,12 @@ async function submitData() {
           <p>Rechnungsnummer: </p>
         </div>
         <div class="col">
-          <fluent-text-field v-model="formData.invoiceNumber" placeholder="Rechnugnsnummer..."></fluent-text-field>
+          <InputGroup>
+            <InputText v-model="formData.invoiceNumber" placeholder="Rechnungsnummer" variant="filled" />
+            <InputGroupAddon>
+              <i class="pi pi-file"></i>
+            </InputGroupAddon>
+          </InputGroup>
         </div>
       </div>
       <div class="row">
@@ -186,7 +198,12 @@ async function submitData() {
           <p>Name des Mitgliedes: </p>
         </div>
         <div class="col">
-          <fluent-text-field v-model="formData.memberName" placeholder="Name..."></fluent-text-field>
+          <InputGroup>
+            <InputText v-model="formData.memberName" placeholder="Name" variant="filled" />
+            <InputGroupAddon>
+              <i class="pi pi-user"></i>
+            </InputGroupAddon>
+          </InputGroup>
         </div>
 
       </div>
@@ -239,13 +256,13 @@ async function submitData() {
       <p>46462 Wesel</p>
     </div>
 
-    <div class="dialog-container">
-      <fluent-button appearance="accent" @click="openDialog">Kostenstellen Übersicht</fluent-button>
-      <DialogComponent ref="dialogRef">
-      </DialogComponent>
-    </div>
 
     <div class="article-list-wrapper">
+      <div class="dialog-container">
+        <fluent-button appearance="accent" @click="openDialog">Kostenstellen Übersicht</fluent-button>
+        <DialogComponent ref="dialogRef">
+        </DialogComponent>
+      </div>
       <fluent-card class="article-list-card">
         <table>
           <thead>
@@ -258,14 +275,18 @@ async function submitData() {
               <td v-for="column in columns" :key="column">
                 <FVTextField v-if="column !== 'costCenter'" :type="getColumnType(column)" v-model="row[column]"
                   :placeholder="getPlaceholder(column)"></FVTextField>
-                <FVComboBox v-else v-model="row[column]" autocomplete="both" placeholder="-- Auswählen --"
+
+                <Dropdown v-else v-model="row[column]" :options="costCenterOptions" placeholder="-- Auswählen --"
+                  variant="filled" filter showClear :virtualScrollerOptions="{ itemSize: 38 }"
+                  class="w-full md:w-14rem combo-option" />
+                <!-- <FVComboBox v-else v-model="row[column]" autocomplete="both" placeholder="-- Auswählen --"
                   class="cost-select" position="below">
                   <fluent-option position="below" class="combo-option" v-for="option in costCenterOptions" :key="option"
                     :value="option">{{
             option
           }}</fluent-option>
 
-                </FVComboBox>
+                </FVComboBox> -->
               </td>
             </tr>
           </tbody>
@@ -275,10 +296,9 @@ async function submitData() {
       </fluent-card>
     </div>
 
-    <div class="withdrawal-container">
+    <!-- <div class="withdrawal-container">
       <fluent-card class="withdrawal-card">
-        <fluent-select v-model="formData.withdrawalSelection" placeholder="-- Auswählen --" class="withdrawal-select"
-          position="below">
+        <fluent-select placeholder="-- Auswählen --" class="withdrawal-select" position="below">
           <fluent-option position="below" selected value="vf">Gutschrift auf Vereinsfliegerkonto</fluent-option>
           <fluent-option position="below" value="transfer-bank">Überweisung auf Bankkonto</fluent-option>
           <fluent-option position="below" value="transfer-biller">Überweisung an Rechnungssteller</fluent-option>
@@ -297,7 +317,49 @@ async function submitData() {
           <fluent-text-field v-model="formData.bic" placeholder="BIC">BIC</fluent-text-field>
         </div>
       </fluent-card>
-    </div>
+    </div> -->
+
+    <Card>
+      <template #title>Art der Begleichung</template>
+      <template #content>
+        <InputGroup style="max-width: 40%;">
+          <Dropdown v-model="formData.withdrawalSelection" :options="withdrawalOptions" optionLabel="name"
+            option-value="code" placeholder="Select" variant="filled" class="w-full md:w-14rem" />
+
+          <InputGroupAddon>
+            <i class="pi pi-euro"></i>
+          </InputGroupAddon>
+        </InputGroup>
+
+
+        <div class="bank-inputs" v-if="formData.withdrawalSelection.startsWith('transfer')">
+          <fluent-divider></fluent-divider>
+          <p v-if="formData.withdrawalSelection.includes('bank')">Für ein <strong>abweichendes</strong> Konto den Betrag
+            auf
+            folgendes
+            Bankkonto überweisen:</p>
+          <p v-if="formData.withdrawalSelection.includes('transfer-biller')">Kontodaten des Rechnungsstellers:</p>
+          <InputGroup>
+            <InputText v-model="formData.bankRecipient" placeholder="Vorname Nachname" variant="filled" />
+            <InputGroupAddon>
+              <i class="pi pi-pencil"></i>
+            </InputGroupAddon>
+          </InputGroup>
+          <InputGroup>
+            <InputText v-model="formData.iban" placeholder="IBAN" variant="filled" />
+            <InputGroupAddon>
+              <i class="pi pi-lock"></i>
+            </InputGroupAddon>
+          </InputGroup>
+          <InputGroup>
+            <InputText v-model="formData.bic" placeholder="BIC" variant="filled" />
+            <InputGroupAddon>
+              <i class="pi pi-building"></i>
+            </InputGroupAddon>
+          </InputGroup>
+        </div>
+      </template>
+    </Card>
 
     <div class="approver-container">
       <fluent-card>
@@ -388,11 +450,16 @@ async function submitData() {
   height: 100%;
 }
 
+.main-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
 .general-information-container {
   display: flex;
   align-items: center;
   flex-direction: column;
-  margin-bottom: 2em;
   gap: 1rem;
 }
 
@@ -461,6 +528,7 @@ async function submitData() {
 
 .dialog-container {
   text-align: end;
+  margin-bottom: .5rem;
 }
 
 .article-list-card {
@@ -469,9 +537,9 @@ async function submitData() {
   contain: unset;
 }
 
-.article-list-wrapper {
+/* .article-list-wrapper {
   margin-top: .5rem;
-}
+} */
 
 .article-list-wrapper th {
   font-size: 1.2rem;
@@ -488,41 +556,11 @@ async function submitData() {
   font-weight: bold;
 }
 
-.withdrawal-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 2rem;
-}
-
-.withdrawal-card {
-  contain: unset;
-  margin-top: 2rem;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-}
-
-.withdrawal-card fluent-text-field {
-  max-width: 50%;
-}
-
-.withdrawal-select {
-  max-width: 30rem;
-}
-
-.withdrawal-select fluent-option {
-  font-size: 1.2rem;
-  padding: 1rem;
-  line-height: 2rem;
-}
-
 .bank-inputs {
   display: flex;
   flex-direction: column;
   gap: .7rem;
+  max-width: 40%;
 }
 
 .bank-inputs p {
@@ -532,7 +570,6 @@ async function submitData() {
 .approver-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 2rem;
 }
 
 .approver-container fluent-card {
@@ -555,14 +592,13 @@ async function submitData() {
 }
 
 .remarks-container {
-  margin-top: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .remarks {
-  width: 30%;
+  width: 100%;
   height: auto;
 }
 </style>./components/Dialog.vue
